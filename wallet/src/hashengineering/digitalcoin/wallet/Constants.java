@@ -81,7 +81,7 @@ public class Constants
 	public static final int LOCAL_PRECISION = 4;
 
 	public static final String DONATION_ADDRESS = CoinDefinition.DONATION_ADDRESS;
-	public static final String REPORT_EMAIL = "hashengineering@gmail.com";
+	public static final String REPORT_EMAIL = "hashengineeringsolutions@gmail.com";
 	public static final String REPORT_SUBJECT_ISSUE = "Reported issue";
 	public static final String REPORT_SUBJECT_CRASH = "Crash report";
 
