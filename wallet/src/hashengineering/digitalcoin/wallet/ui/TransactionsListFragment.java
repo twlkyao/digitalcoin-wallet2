@@ -72,9 +72,10 @@ import hashengineering.digitalcoin.wallet.WalletApplication;
 import hashengineering.digitalcoin.wallet.util.BitmapFragment;
 import hashengineering.digitalcoin.wallet.util.Nfc;
 import hashengineering.digitalcoin.wallet.util.Qr;
-import hashengineering.digitalcoin.wallet.util.ThrottelingWalletChangeListener;
 import hashengineering.digitalcoin.wallet.util.WalletUtils;
 import hashengineering.digitalcoin.wallet.R;
+
+import hashengineering.digitalcoin.wallet.util.ThrottlingWalletChangeListener;
 
 /**
  * @author Andreas Schildbach
@@ -354,10 +355,10 @@ public class TransactionsListFragment extends SherlockListFragment implements Lo
 		// don't clear the adapter, because it will confuse users
 	}
 
-	private final ThrottelingWalletChangeListener transactionChangeListener = new ThrottelingWalletChangeListener(THROTTLE_MS)
+	private final ThrottlingWalletChangeListener transactionChangeListener = new ThrottlingWalletChangeListener(THROTTLE_MS)
 	{
 		@Override
-		public void onThrotteledWalletChanged()
+		public void onThrottledWalletChanged()
 		{
 			adapter.notifyDataSetChanged();
 		}
@@ -422,11 +423,11 @@ public class TransactionsListFragment extends SherlockListFragment implements Lo
 			return filteredTransactions;
 		}
 
-		private final ThrottelingWalletChangeListener transactionAddRemoveListener = new ThrottelingWalletChangeListener(THROTTLE_MS, true, true,
+		private final ThrottlingWalletChangeListener transactionAddRemoveListener = new ThrottlingWalletChangeListener(THROTTLE_MS, true, true,
 				false)
 		{
 			@Override
-			public void onThrotteledWalletChanged()
+			public void onThrottledWalletChanged()
 			{
 				forceLoad();
 			}

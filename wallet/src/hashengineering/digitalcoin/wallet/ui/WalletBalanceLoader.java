@@ -27,7 +27,8 @@ import android.support.v4.content.AsyncTaskLoader;
 import com.google.digitalcoin.core.Wallet;
 import com.google.digitalcoin.core.Wallet.BalanceType;
 
-import hashengineering.digitalcoin.wallet.util.ThrottelingWalletChangeListener;
+
+import hashengineering.digitalcoin.wallet.util.ThrottlingWalletChangeListener;
 
 /**
  * @author Andreas Schildbach
@@ -68,10 +69,10 @@ public final class WalletBalanceLoader extends AsyncTaskLoader<BigInteger>
 		return wallet.getBalance(BalanceType.ESTIMATED);
 	}
 
-	private final ThrottelingWalletChangeListener walletChangeListener = new ThrottelingWalletChangeListener()
+	private final ThrottlingWalletChangeListener walletChangeListener = new ThrottlingWalletChangeListener()
 	{
 		@Override
-		public void onThrotteledWalletChanged()
+		public void onThrottledWalletChanged()
 		{
 			forceLoad();
 		}

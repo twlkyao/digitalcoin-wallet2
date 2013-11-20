@@ -50,7 +50,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
@@ -91,9 +90,10 @@ import hashengineering.digitalcoin.wallet.WalletBalanceWidgetProvider;
 import hashengineering.digitalcoin.wallet.ui.WalletActivity;
 import hashengineering.digitalcoin.wallet.util.CrashReporter;
 import hashengineering.digitalcoin.wallet.util.GenericUtils;
-import hashengineering.digitalcoin.wallet.util.ThrottelingWalletChangeListener;
 import hashengineering.digitalcoin.wallet.util.WalletUtils;
 import hashengineering.digitalcoin.wallet.R;
+
+import hashengineering.digitalcoin.wallet.util.ThrottlingWalletChangeListener;
 
 /**
  * @author Andreas Schildbach
@@ -135,10 +135,10 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 
 	private static final Logger log = LoggerFactory.getLogger(BlockchainServiceImpl.class);
 
-	private final WalletEventListener walletEventListener = new ThrottelingWalletChangeListener(APPWIDGET_THROTTLE_MS)
+	private final WalletEventListener walletEventListener = new ThrottlingWalletChangeListener(APPWIDGET_THROTTLE_MS)
 	{
 		@Override
-		public void onThrotteledWalletChanged()
+		public void onThrottledWalletChanged()
 		{
 			notifyWidgets();
 		}
@@ -347,11 +347,8 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 
 			if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action))
 			{
-				final boolean extraConnectivity = !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-				final NetworkInfo networkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-				final boolean extraIsConnected = networkInfo != null && networkInfo.isConnected();
-				hasConnectivity = extraConnectivity && extraIsConnected;
-				log.info("network is " + (hasConnectivity ? "up" : "down") + " (extras: " + extraConnectivity + "/" + extraIsConnected + ")");
+				hasConnectivity = !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+				log.info("network is " + (hasConnectivity ? "up" : "down"));
 
 				check();
 			}
@@ -419,6 +416,8 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 
 						if (hasTrustedPeer)
 						{
+							log.info("trusted peer '" + trustedPeerHost + "'" + (connectTrustedPeerOnly ? " only" : ""));
+
 							final InetSocketAddress addr = new InetSocketAddress(trustedPeerHost, Constants.NETWORK_PARAMETERS.getPort());
 							if (addr.getAddress() != null)
 							{
@@ -694,6 +693,8 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 
 		if (BlockchainService.ACTION_RESET_BLOCKCHAIN.equals(intent.getAction()))
 		{
+			log.info("will remove blockchain on service shutdown");
+
 			resetBlockchainOnShutdown = true;
 			stopSelf();
 		}
@@ -755,7 +756,7 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 
 		if (resetBlockchainOnShutdown)
 		{
-			log.debug("removing blockchain");
+			log.info("removing blockchain");
 			blockChainFile.delete();
 		}
 
